@@ -25,7 +25,7 @@ public class UserPreferenceManager {
 
 
     /*
-     * Singleton pattern을 사용해 하나의 메서
+     * Singleton pattern을 사용
      */
     public static UserPreferenceManager getInstance(Context context) {
         if (instance == null) {
