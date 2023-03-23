@@ -122,6 +122,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
         initCodeScanner();
         initShakeDetector();
+        initUi();
     }
 
     /*
@@ -141,7 +142,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
             Timber.d("스캔 결과: " + result.getText());
 
             uiHandler.post(() -> { // UI 스레드에서 실행되도록 요청
-                ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 500);
+                ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, ToneGenerator.MAX_VOLUME);
                 toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP); // 스캔시 Beep음 출력
 
                 // Intent를 이용하여 해당 URL을 브라우저로 열어줌
@@ -175,6 +176,26 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
      * onResume() : Activity가 사용자 화면에서 보일 때마다 실행
      * 카메가 권한 요청
      */
+
+    private void initUi() {
+        binding.myInformationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, InformationActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+
+        binding.reviewButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Intent intent = new Intent(HomeActivity.this, ReviewActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -187,6 +208,18 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         } else {
             codeScanner.startPreview(); // 카메라 미리보기
         }
+    }
+
+    @Override
+    protected void onPause(){
+        codeScanner.releaseResources();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy(){
+        shakeDetector.stop();
+        super.onDestroy();
     }
 
 

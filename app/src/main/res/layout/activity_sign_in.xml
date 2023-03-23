@@ -50,6 +50,7 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/password_text_field"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"

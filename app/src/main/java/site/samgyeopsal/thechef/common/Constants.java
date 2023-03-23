@@ -18,9 +18,8 @@ import okhttp3.CookieJar;
 public class Constants {
 
     // Retrofit base Url 선언
-    public static final String baseUrl = "http://192.168.137.108:80";
+    public static final String baseUrl = "http://192.168.137.108";
+    //public static final String baseUrl = "http://thechef.site";
 
-    // CookieJar 전역 변수 생성 및 초기화
-    public static CookieJar cookieJar = null;
 }
 

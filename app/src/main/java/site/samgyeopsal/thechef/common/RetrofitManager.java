@@ -3,6 +3,7 @@ package site.samgyeopsal.thechef.common;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import site.samgyeopsal.thechef.retrofit.AuthService;
+import site.samgyeopsal.thechef.retrofit.ReviewService;
 
 /**
  * @filename RetrofitManager
@@ -35,6 +36,7 @@ public class RetrofitManager {
 
 
     public AuthService authService;
+    public ReviewService reviewService;
 
 
     private RetrofitManager() {
@@ -44,5 +46,6 @@ public class RetrofitManager {
                 .build();
 
         authService = retrofit.create(AuthService.class);
+        reviewService = retrofit.create(ReviewService.class);
     }
 }
