@@ -11,12 +11,15 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.arjinmc.recyclerviewdecoration.RecyclerViewLinearItemDecoration;
+import com.google.android.material.datepicker.MaterialStyledDatePickerDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +35,7 @@ import site.samgyeopsal.thechef.BaseActivity;
 import site.samgyeopsal.thechef.adapter.ReviewAdapter;
 import site.samgyeopsal.thechef.common.RetrofitManager;
 import site.samgyeopsal.thechef.databinding.ActivityReviewBinding;
+import site.samgyeopsal.thechef.databinding.DialogReviewReplyBinding;
 import site.samgyeopsal.thechef.databinding.ItemReviewBinding;
 import site.samgyeopsal.thechef.model.Review;
 import site.samgyeopsal.thechef.retrofit.ReviewService;
@@ -167,11 +171,9 @@ public class ReviewActivity extends BaseActivity {
                 .thickness((int) (getResources().getDisplayMetrics().density * 8))
                 .create();
         binding.recyclerView.addItemDecoration(decoration);
-
+        adapter.setOnItemClickListener(this::writeReply);
         binding.recyclerView.setAdapter(adapter);
         refresh();
-
-
     }
 
     /*
@@ -192,7 +194,6 @@ public class ReviewActivity extends BaseActivity {
         }
 
         adapter.submitList(filteredReviews);
-
 
     }
 
@@ -251,8 +252,20 @@ public class ReviewActivity extends BaseActivity {
     }
 
 
+    public void writeReply(Review review){
+        DialogReviewReplyBinding binding = DialogReviewReplyBinding.inflate(getLayoutInflater());
+        AlertDialog dialog = new MaterialAlertDialogBuilder(this)
+                .setView(binding.getRoot())
+                .create();
 
+        // 내용, 날짜 바인딩
+        binding.contentTextView.setText(review.content);
+        binding.dateTextView.setText(review.date);
 
+        binding.negativeButton.setOnClickListener(v -> dialog.dismiss());
+        binding.positiveButton.setOnClickListener(v -> dialog.dismiss());
 
+        dialog.show();
 
+    }
 }
