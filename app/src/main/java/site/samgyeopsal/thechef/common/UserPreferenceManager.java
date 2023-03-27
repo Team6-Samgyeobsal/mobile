@@ -49,7 +49,7 @@ public class UserPreferenceManager {
     private final SharedPreferences prefs;
 
 
-    private UserPreferenceManager(Context context) {
+    public UserPreferenceManager(Context context) {
         this.prefs = context.getSharedPreferences("prefs", Context.MODE_PRIVATE);
     }
 

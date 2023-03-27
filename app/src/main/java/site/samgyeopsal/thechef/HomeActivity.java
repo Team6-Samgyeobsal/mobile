@@ -11,8 +11,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.format.DateUtils;
 import android.view.View;
 import android.webkit.URLUtil;
+import android.widget.ImageView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -30,12 +32,21 @@ import androidx.lifecycle.Lifecycle;
 import com.budiyev.android.codescanner.AutoFocusMode;
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.ScanMode;
+import com.bumptech.glide.Glide;
 import com.google.zxing.BarcodeFormat;
 import com.squareup.seismic.ShakeDetector;
 
 import java.util.Collections;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import site.samgyeopsal.thechef.app.GlideApp;
+import site.samgyeopsal.thechef.common.RetrofitManager;
+import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityHomeBinding;
+import site.samgyeopsal.thechef.model.Funding;
+import site.samgyeopsal.thechef.retrofit.FundingService;
 import timber.log.Timber;
 
 /**
@@ -53,8 +64,12 @@ import timber.log.Timber;
 public class HomeActivity extends AppCompatActivity implements ShakeDetector.Listener  {
 
     private ActivityHomeBinding binding;
+    private FundingService fundingService;
     private CodeScanner codeScanner;
     private ShakeDetector shakeDetector;
+
+    private ImageView imageView;
+
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     /*
@@ -84,6 +99,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+
         // 레이아웃의 fitsSystemWindows 특성을 제거하여 시스템 바와 상호 작용하는 뷰의 크기를 조정
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
@@ -100,6 +116,11 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
          */
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        imageView = binding.imageView;
+
+        fundingService = RetrofitManager.getInstance().fundingService;
+
 
 
         // padding bottom에 해당하는 부분 조절, WindowInsets의 변경 사항 감지 후 처리하는 리스너 등록
@@ -123,6 +144,8 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         initCodeScanner();
         initShakeDetector();
         initUi();
+
+        fetchFundingInformation(10);
     }
 
     /*
@@ -241,4 +264,61 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
+
+
+
+    private void fetchFundingInformation(long id) {
+        Context context= imageView.getContext();
+        fundingService.getFunding(id).enqueue(new Callback<Funding>() {
+            @Override
+            public void onResponse(Call<Funding> call, Response<Funding> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Funding funding = response.body();
+                    System.out.println(">>>> funding : " + funding);
+
+                    if (funding.fThumbUrl != null){
+                        GlideApp.with(context)
+                                .load(funding.fThumbUrl)
+                                .into(imageView);
+                        Timber.d("fThumbUrl : %s", funding.fThumbUrl);
+                    } else {
+                        Timber.w("fThumbUrl is null");
+                    }
+
+                    /*GlideApp.with(context)
+                            .load(response.body().fThumbUrl)
+                            //.override(5,5)
+                            .into(imageView);
+                    System.out.println(">>> fThumbUrl :  "  + response.body().fThumbUrl);
+
+                    Timber.d("fThumbUrl: %s", response.body().fThumbUrl);*/
+
+
+
+
+
+                    // 프로필 이미지
+                    // binding.profileImageView.setImageBitmap();
+
+
+                    binding.nameTextView.setText(funding.storeName);
+
+                    System.out.println(">>> storename : " + funding.storeName);
+
+
+
+                    //endregion
+                } else {
+                    Timber.w(">>>>>>>>>>>>>>>>>>>Failed to fetch funding data: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Funding> call, Throwable t) {
+                Timber.w(t);
+            }
+        });
+    }
+
+
 }

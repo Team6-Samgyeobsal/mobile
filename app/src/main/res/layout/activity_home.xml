@@ -100,7 +100,8 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@color/black12"
-                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CornerSize50Percent" />
+                app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.CornerSize50Percent"
+               />
 
             <!-- 추후 수정-->
             <TextView
