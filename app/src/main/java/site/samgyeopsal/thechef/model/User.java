@@ -29,4 +29,7 @@ public class User {
 
     @SerializedName("refreshToken")
     public String refreshToken = "";
+
+    @SerializedName("store")
+    public Store store = null;
 }

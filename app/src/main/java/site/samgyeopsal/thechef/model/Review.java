@@ -17,20 +17,29 @@ import com.google.gson.annotations.SerializedName;
 public class Review {
 
     @SerializedName("rscore")
-    public int score = 0;
+    public int rScore = 0;
 
     @SerializedName("rtype")
-    public String type = "";
+    public String rType = "";
 
     @SerializedName("rimg_rul")
-    public String imageUrl = null;
+    public String rImageUrl = null;
 
     @SerializedName("memail")
-    public String email = "";
+    public String mEmail = "";
 
     @SerializedName("rdate")
-    public String date ="";
+    public String rDate = "";
+
+    @SerializedName("fid")
+    public String fId = null;
 
     @SerializedName("rcontent")
-    public String content = "";
+    public String rContent = "";
+
+    @SerializedName("recontent")
+    public String reContent = null;
+
+    @SerializedName("redate")
+    public Long reDate = null;
 }

@@ -3,10 +3,15 @@ package site.samgyeopsal.thechef.retrofit;
 
 import java.util.List;
 
+import okhttp3.RequestBody;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import site.samgyeopsal.thechef.model.Review;
+import site.samgyeopsal.thechef.model.ReviewResponse;
 
 /**
  * @filename ReviewService
@@ -26,9 +31,15 @@ import site.samgyeopsal.thechef.model.Review;
  */
 public interface ReviewService {
     @GET("/api/funding/review")
-    Call<List<Review>> getReviews(
-            @Query("fid") int fid, // 펀딩 id
+    Call<ReviewResponse> getReviews(
+            @Query("fid") String sid, // 펀딩 id
             @Query("sort") int sort, // 리뷰 정렬
             @Query("type") String type // 리뷰 타입
+    );
+
+    @POST("/api/funding/{fid}/product/replyReview")
+    Call<String> replyToReview(
+            @Path("fid") String sid,
+            @Body RequestBody requestBody
     );
 }

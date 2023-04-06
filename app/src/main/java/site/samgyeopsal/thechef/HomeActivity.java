@@ -11,10 +11,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,7 +33,8 @@ import androidx.lifecycle.Lifecycle;
 import com.budiyev.android.codescanner.AutoFocusMode;
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.ScanMode;
-import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.zxing.BarcodeFormat;
 import com.squareup.seismic.ShakeDetector;
 
@@ -45,8 +47,10 @@ import site.samgyeopsal.thechef.app.GlideApp;
 import site.samgyeopsal.thechef.common.RetrofitManager;
 import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityHomeBinding;
-import site.samgyeopsal.thechef.model.Funding;
-import site.samgyeopsal.thechef.retrofit.FundingService;
+import site.samgyeopsal.thechef.model.OrderResponse;
+import site.samgyeopsal.thechef.model.Store;
+import site.samgyeopsal.thechef.retrofit.OrderService;
+import site.samgyeopsal.thechef.retrofit.StoreService;
 import timber.log.Timber;
 
 /**
@@ -64,9 +68,11 @@ import timber.log.Timber;
 public class HomeActivity extends AppCompatActivity implements ShakeDetector.Listener  {
 
     private ActivityHomeBinding binding;
-    private FundingService fundingService;
+    private StoreService storeService;
+    private OrderService orderService;
     private CodeScanner codeScanner;
     private ShakeDetector shakeDetector;
+    private UserPreferenceManager userPreferenceManager;
 
     private ImageView imageView;
 
@@ -119,7 +125,11 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
         imageView = binding.imageView;
 
-        fundingService = RetrofitManager.getInstance().fundingService;
+        storeService = RetrofitManager.getInstance().storeService;
+        orderService = RetrofitManager.getInstance().orderService;
+        userPreferenceManager = UserPreferenceManager.getInstance(this);
+
+        System.out.println("userpreference :::::: " + userPreferenceManager);
 
 
 
@@ -145,7 +155,12 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         initShakeDetector();
         initUi();
 
-        fetchFundingInformation(10);
+        Store store = userPreferenceManager.getUser().store;
+
+        String sid = store.getSid();
+        System.out.println("sid ::::::::" + sid);
+
+        fetchFundingInformation(sid);
     }
 
     /*
@@ -172,6 +187,8 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
                 if (URLUtil.isNetworkUrl(result.getText())){
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(result.getText()));
                     startActivity(intent);
+                } else {
+                    getOrder(result.getText());
                 }
 
                 uiHandler.postDelayed(()-> { // 2초 후에 다시 스캔
@@ -183,6 +200,41 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         });
 
         codeScanner.setErrorCallback(Timber::d);
+    }
+
+    private void getOrder(String oid){
+        if (binding.progressView.getVisibility() == View.VISIBLE) return;
+
+        binding.progressView.setVisibility(View.VISIBLE);
+        System.out.println("주문번호(OID) ::::::: " + oid);
+        orderService.getOrder(oid).enqueue(new Callback<OrderResponse>() {
+            @Override
+            public void onResponse(Call<OrderResponse> call, Response<OrderResponse> response) {
+                binding.progressView.setVisibility(View.GONE);
+
+                if (response.isSuccessful()){
+                    OrderResponse orderResponse = response.body();
+
+                    Intent intent = new Intent(HomeActivity.this, TakeOrderActivity.class);
+                    intent.putExtra("order", orderResponse);
+                    startActivity(intent);
+
+                } else {
+                    Toast.makeText(
+                            HomeActivity.this,
+                            "유효하지 않은 QR 코드입니다. 주문 정보를 다시 확인해주세요.",
+                            Toast.LENGTH_SHORT
+                    ).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderResponse> call, Throwable t) {
+                Timber.d(t);
+                binding.progressView.setVisibility(View.GONE);
+
+            }
+        });
     }
 
     /*
@@ -201,6 +253,15 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
      */
 
     private void initUi() {
+        // 주문 내역 버튼 클릭시, 주문 내역 화면 시작
+        binding.orderHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, OrderHistoryActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+            }
+        });
         binding.myInformationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -267,20 +328,25 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
 
 
-    private void fetchFundingInformation(long id) {
+    private void fetchFundingInformation(String sid) {
+        System.out.println("String sid :::: >>>>> " + sid);
         Context context= imageView.getContext();
-        fundingService.getFunding(id).enqueue(new Callback<Funding>() {
+        storeService.getStore(sid).enqueue(new Callback<Store>() {
             @Override
-            public void onResponse(Call<Funding> call, Response<Funding> response) {
+            public void onResponse(Call<Store> call, Response<Store> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Funding funding = response.body();
-                    System.out.println(">>>> funding : " + funding);
+                    RequestOptions requestOptions = new RequestOptions();
+                    requestOptions = requestOptions.transforms(new CircleCrop());
 
-                    if (funding.fThumbUrl != null){
+                    Store store = response.body();
+                    System.out.println(":::::: store : " + store);
+
+                    if (store.sThumbUrl != null){
                         GlideApp.with(context)
-                                .load(funding.fThumbUrl)
+                                .load(store.sThumbUrl)
+                                .apply(requestOptions)
                                 .into(imageView);
-                        Timber.d("fThumbUrl : %s", funding.fThumbUrl);
+                        Timber.d("fThumbUrl : %s", store.sThumbUrl);
                     } else {
                         Timber.w("fThumbUrl is null");
                     }
@@ -301,9 +367,9 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
                     // binding.profileImageView.setImageBitmap();
 
 
-                    binding.nameTextView.setText(funding.storeName);
+                    binding.nameTextView.setText(store.storeName);
 
-                    System.out.println(">>> storename : " + funding.storeName);
+                    System.out.println(">>> storename : " + store.storeName);
 
 
 
@@ -314,7 +380,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
             }
 
             @Override
-            public void onFailure(Call<Funding> call, Throwable t) {
+            public void onFailure(Call<Store> call, Throwable t) {
                 Timber.w(t);
             }
         });

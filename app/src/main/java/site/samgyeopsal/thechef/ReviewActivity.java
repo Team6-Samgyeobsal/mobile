@@ -3,41 +3,35 @@ package site.samgyeopsal.thechef;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DiffUtil;
-import androidx.recyclerview.widget.ListAdapter;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.arjinmc.recyclerviewdecoration.RecyclerViewLinearItemDecoration;
-import com.google.android.material.datepicker.MaterialStyledDatePickerDialog;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import site.samgyeopsal.thechef.BaseActivity;
 import site.samgyeopsal.thechef.adapter.ReviewAdapter;
 import site.samgyeopsal.thechef.common.RetrofitManager;
+import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityReviewBinding;
 import site.samgyeopsal.thechef.databinding.DialogReviewReplyBinding;
-import site.samgyeopsal.thechef.databinding.ItemReviewBinding;
 import site.samgyeopsal.thechef.model.Review;
+import site.samgyeopsal.thechef.model.ReviewResponse;
+import site.samgyeopsal.thechef.model.Store;
 import site.samgyeopsal.thechef.retrofit.ReviewService;
 import timber.log.Timber;
 
@@ -60,7 +54,11 @@ public class ReviewActivity extends BaseActivity {
     private ActivityReviewBinding binding;
     private final ReviewService reviewService = RetrofitManager.getInstance().reviewService;
     private ArrayList<Review> reviews = new ArrayList<>();
-    private Call<List<Review>> call;
+    private Call<ReviewResponse> call;
+    public UserPreferenceManager userPreferenceManager;
+
+
+
 
     /*
      * onCreate() : ActivityReviewBinding을 inflate
@@ -69,11 +67,16 @@ public class ReviewActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        System.out.println("Review onCreate ");
 
         binding = ActivityReviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        userPreferenceManager = UserPreferenceManager.getInstance(this);
+
+
 
         initUi();
+
     }
 
     /*
@@ -83,6 +86,7 @@ public class ReviewActivity extends BaseActivity {
 
     private void initUi() {
         // 홈 버튼
+        System.out.println(":::::::initUI");
         binding.homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,7 +123,7 @@ public class ReviewActivity extends BaseActivity {
                 binding.searchField.getEditText().clearFocus(); // 포커스 제거 (사용자 편의성 향상)
                 binding.searchField.getEditText().setText("");
                 binding.searchContainer.setVisibility(view.GONE);
-                binding.searchContainer.setVisibility(view.VISIBLE);
+                binding.titleContainer.setVisibility(view.VISIBLE);
 
             }
         });
@@ -166,11 +170,12 @@ public class ReviewActivity extends BaseActivity {
 
         binding.swipeRefreshLayout.setOnRefreshListener(this::refresh);
 
-        RecyclerViewLinearItemDecoration decoration = new RecyclerViewLinearItemDecoration.Builder(this)
+        // 선 굵기
+        /*RecyclerViewLinearItemDecoration decoration = new RecyclerViewLinearItemDecoration.Builder(this)
                 .color(ContextCompat.getColor(this, R.color.black12))
-                .thickness((int) (getResources().getDisplayMetrics().density * 8))
+                .thickness((int) (getResources().getDisplayMetrics().density * 1))
                 .create();
-        binding.recyclerView.addItemDecoration(decoration);
+        binding.recyclerView.addItemDecoration(decoration);*/
         adapter.setOnItemClickListener(this::writeReply);
         binding.recyclerView.setAdapter(adapter);
         refresh();
@@ -187,7 +192,7 @@ public class ReviewActivity extends BaseActivity {
         } else {
             for (int i = 0; i < reviews.size(); i++) {
                 Review review = reviews.get(i);
-                if (review.content.contains(query)) {
+                if (review.rContent.contains(query)) {
                     filteredReviews.add(review);
                 }
             }
@@ -205,18 +210,26 @@ public class ReviewActivity extends BaseActivity {
 
         binding.swipeRefreshLayout.setRefreshing(true);
 
-        call = reviewService.getReviews(1, 1, "funding");
-        call.enqueue(new Callback<List<Review>>() {
+
+        Store s = userPreferenceManager.getUser().store;
+        System.out.println("Store = "+s);
+        String sid = s.getSid();
+
+
+        // fid 받아오는법 알아보기
+        call = reviewService.getReviews(sid, 1, "STORE");
+        System.out.println("::::::::call :::::::: " + call);
+        call.enqueue(new Callback<ReviewResponse>() {
             @Override
-            public void onResponse(Call<List<Review>> call, Response<List<Review>> response) {
+            public void onResponse(Call<ReviewResponse> call, Response<ReviewResponse> response) {
                 ReviewActivity.this.call = null;
 
                 if (call.isCanceled()) return;
                 if (response.isSuccessful()) {
                     reviews.clear();
-                    List<Review> responseBody = response.body();
+                    ReviewResponse responseBody = response.body();
                     if (responseBody != null) {
-                        reviews.addAll(responseBody);
+                        reviews.addAll(responseBody.reviews);
                     } else {
                         reviews.addAll(Collections.emptyList());
                     }
@@ -229,7 +242,7 @@ public class ReviewActivity extends BaseActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Review>> call, Throwable t) {
+            public void onFailure(Call<ReviewResponse> call, Throwable t) {
                 ReviewActivity.this.call = null;
                 if (call.isCanceled()) return;
 
@@ -259,13 +272,70 @@ public class ReviewActivity extends BaseActivity {
                 .create();
 
         // 내용, 날짜 바인딩
-        binding.contentTextView.setText(review.content);
-        binding.dateTextView.setText(review.date);
+        binding.contentTextView.setText(review.rContent);
+        binding.dateTextView.setText(review.rDate);
 
-        binding.negativeButton.setOnClickListener(v -> dialog.dismiss());
-        binding.positiveButton.setOnClickListener(v -> dialog.dismiss());
+        if (review.reContent != null && !review.reContent.isEmpty()){
+            binding.replyField.getEditText().append(review.reContent);
 
+            binding.negativeButton.setText("삭제");
+            binding.negativeButton.setOnClickListener(v -> {
+                writeReply(review, binding.replyField.getEditText().getText().toString().trim());
+                dialog.dismiss();
+            });
+        } else {
+            binding.negativeButton.setOnClickListener(v -> {
+                dialog.dismiss();
+            });
+        }
+
+        binding.positiveButton.setOnClickListener(v -> {
+            writeReply(review, binding.replyField.getEditText().getText().toString().trim());
+            });
+
+        userPreferenceManager = UserPreferenceManager.getInstance(this);
         dialog.show();
 
+    }
+
+    private void writeReply(Review review, String message){
+        //userPreferenceManager = UserPreferenceManager.getInstance(this);
+
+
+
+        // 로그인 요청에 사용할 JSon 객체 생성
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("recontent", message);
+            jsonObject.put("fid", userPreferenceManager.getUser().store.getSid());
+            jsonObject.put("memail", review.mEmail);
+            jsonObject.put("rtype", "STORE");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // json 객체를 ResponseBody로 반환
+        RequestBody body = RequestBody.create(
+
+                MediaType.parse("application/json; charset=utf-8"),
+                jsonObject.toString()
+        );
+
+        reviewService.replyToReview(userPreferenceManager.getUser().store.getSid(), body).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()){
+                    refresh();
+                } else {
+                    Timber.d(response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) { Timber.d(t);}
+
+        });
+
+        System.out.println("::::::body::::::" + body);
     }
 }

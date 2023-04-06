@@ -10,6 +10,8 @@
 
     <color name="black5">#0d000000</color>
     <color name="black12">#15000000</color>
+    <color name="black7">#BDBDBD</color>
+    <color name="black33">#54000000</color>
 
     <color name="white12">#15ffffff</color>
 </resources>

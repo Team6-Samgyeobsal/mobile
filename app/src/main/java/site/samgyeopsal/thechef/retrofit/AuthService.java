@@ -3,7 +3,9 @@ package site.samgyeopsal.thechef.retrofit;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import site.samgyeopsal.thechef.model.User;
 
 /**
@@ -26,4 +28,7 @@ import site.samgyeopsal.thechef.model.User;
 public interface AuthService {
     @POST("/api/account/login")
     Call<User> signIn(@Body RequestBody body);
+
+    @GET("/api/store/{fid}")
+    Call<User> getStoreByFid(@Path("fid") String fid);
 }

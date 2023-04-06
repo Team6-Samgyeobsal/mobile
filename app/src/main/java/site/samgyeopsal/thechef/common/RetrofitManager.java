@@ -3,8 +3,9 @@ package site.samgyeopsal.thechef.common;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import site.samgyeopsal.thechef.retrofit.AuthService;
-import site.samgyeopsal.thechef.retrofit.FundingService;
+import site.samgyeopsal.thechef.retrofit.OrderService;
 import site.samgyeopsal.thechef.retrofit.ReviewService;
+import site.samgyeopsal.thechef.retrofit.StoreService;
 
 /**
  * @filename RetrofitManager
@@ -16,6 +17,9 @@ import site.samgyeopsal.thechef.retrofit.ReviewService;
  * 수정일        	수정자       			수정내용
  * ----------  --------    ---------------------------
  * 2023.03.20   최태승        최초 생성
+ * 2023.03.22   최태승        review 연동
+ * 2023.03.25   최태승        funding 연동
+ * 2023.04.03   최태승        funding -> store
  * </pre>
  */
 
@@ -38,7 +42,8 @@ public class RetrofitManager {
 
     public AuthService authService;
     public ReviewService reviewService;
-    public FundingService fundingService;
+    public StoreService storeService;
+    public OrderService orderService;
 
 
     private RetrofitManager() {
@@ -49,6 +54,7 @@ public class RetrofitManager {
 
         authService = retrofit.create(AuthService.class);
         reviewService = retrofit.create(ReviewService.class);
-        fundingService = retrofit.create(FundingService.class);
+        storeService = retrofit.create(StoreService.class);
+        orderService = retrofit.create(OrderService.class);
     }
 }

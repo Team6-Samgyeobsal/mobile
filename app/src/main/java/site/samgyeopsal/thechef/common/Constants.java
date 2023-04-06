@@ -12,15 +12,15 @@ import okhttp3.CookieJar;
  * <pre>
  * 수정일        	수정자       			수정내용
  * ----------  --------    ---------------------------
- * 2023.03.20
+ * 2023.03.20  최태승          최초 생성
  * </pre>
  */
 public class Constants {
 
     // Retrofit base Url 선언
     //public static final String baseUrl = "http://192.168.137.108";
-    public static final String baseUrl = "http://192.168.137.234";
-    //public static final String baseUrl = "http://thechef.site";
+    //public static final String baseUrl = "http://192.168.137.7";
+    public static final String baseUrl = "https://thechef.site";
 
 }
 

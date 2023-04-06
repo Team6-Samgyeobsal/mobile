@@ -20,6 +20,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -144,6 +145,7 @@ public class SignInActivity extends BaseActivity {
     }
 
     private void signIn() {
+        System.out.println("로그인 함수 시작");
         // 로딩중일땐 로그인 요청 중단
         if (binding.progressView.getVisibility() == View.VISIBLE) return;
 
@@ -154,6 +156,8 @@ public class SignInActivity extends BaseActivity {
         // id, password 가져오기
         String id = binding.idTextField.getEditText().getText().toString().trim();
         String password = binding.passwordTextField.getEditText().getText().toString().trim();
+        System.out.println("::::: id >>> " + id);
+        System.out.println("::::: pw >>> " + password);
 
         // 로그인 요청에 사용할 json 객체 생성
         JSONObject jsonObject = new JSONObject();
@@ -168,6 +172,8 @@ public class SignInActivity extends BaseActivity {
         RequestBody body = RequestBody.create(
                 MediaType.parse("application/json; charset=utf-8"),
                 jsonObject.toString());
+
+        System.out.println(">>>>>> body : " + body);
 
         // 로그인 요청 보내기
         authService.signIn(body).enqueue(new Callback<User>() {

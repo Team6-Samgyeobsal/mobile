@@ -23,7 +23,7 @@ public class Member {
      */
 
     @SerializedName("memail")
-    public String male = "";
+    public String memail = "";
 
     @SerializedName("mpassword")
     public String password = "";

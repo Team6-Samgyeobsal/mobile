@@ -21,8 +21,9 @@ import retrofit2.Response;
 import site.samgyeopsal.thechef.common.RetrofitManager;
 import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityInformationBinding;
-import site.samgyeopsal.thechef.model.Funding;
-import site.samgyeopsal.thechef.retrofit.FundingService;
+import site.samgyeopsal.thechef.model.Store;
+import site.samgyeopsal.thechef.model.User;
+import site.samgyeopsal.thechef.retrofit.StoreService;
 import timber.log.Timber;
 
 /**
@@ -41,7 +42,7 @@ import timber.log.Timber;
 public class InformationActivity extends AppCompatActivity {
 
     private ActivityInformationBinding binding;
-    private FundingService fundingService;
+    private StoreService storeService;
     private UserPreferenceManager userPreferenceManager;
 
 
@@ -65,7 +66,7 @@ public class InformationActivity extends AppCompatActivity {
         binding = ActivityInformationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        fundingService = RetrofitManager.getInstance().fundingService;
+        storeService = RetrofitManager.getInstance().storeService;
         userPreferenceManager = UserPreferenceManager.getInstance(this);
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.contentContainer, new OnApplyWindowInsetsListener() {
@@ -90,7 +91,12 @@ public class InformationActivity extends AppCompatActivity {
         });
 
         initUi();
-        fetchFundingInformation(10);
+
+        Store store = userPreferenceManager.getUser().store;
+
+        String sid = store.getSid();
+
+        fetchFundingInformation(sid);
     }
 
     /*
@@ -116,12 +122,12 @@ public class InformationActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchFundingInformation(long id) {
-        fundingService.getFunding(id).enqueue(new Callback<Funding>() {
+    private void fetchFundingInformation(String sid) {
+        storeService.getStore(sid).enqueue(new Callback<Store>() {
             @Override
-            public void onResponse(Call<Funding> call, Response<Funding> response) {
+            public void onResponse(Call<Store> call, Response<Store> response) {
                 if (response.isSuccessful()) {
-                    Funding funding = response.body();
+                    Store store = response.body();
 
                     //region Header
                     // 배경 이미지
@@ -130,30 +136,30 @@ public class InformationActivity extends AppCompatActivity {
                     // 프로필 이미지
                     // binding.profileImageView.setImageBitmap();
 
-                    binding.totalEmailTextView.setText(String.valueOf(funding.totalEmail));
-                    binding.priceTextView.setText(String.valueOf(funding.totalPrice));
-                    binding.nameTextView.setText(funding.storeName);
-                    binding.categoryTextView.setText(funding.ctName);
+                    binding.totalEmailTextView.setText(String.valueOf(store.totalEmail));
+                    binding.priceTextView.setText(String.valueOf(store.totalPrice));
+                    binding.nameTextView.setText(store.storeName);
+                    binding.categoryTextView.setText(store.ctName);
                     //endregion
 
                     //region Contents
                     binding.dateTextView.setText(DateUtils.formatDateTime(
                             InformationActivity.this,
-                            funding.date,
+                            store.fDate,
                             DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_DATE)
                     );
 
-                    binding.totalEmailTextView2.setText(String.valueOf(funding.totalEmail));
-                    binding.totalPriceTextView.setText(String.valueOf(funding.totalPrice));
-                    binding.addressTextView.setText(funding.tName);
+                    binding.totalEmailTextView2.setText(String.valueOf(store.totalEmail));
+                    binding.totalPriceTextView.setText(String.valueOf(store.totalPrice));
+                    binding.addressTextView.setText(store.tName);
                     //endregion
                 } else {
-                    Timber.w("Failed to fetch funding data: " + response.message());
+                    Timber.w(">>>>>>>>>>>> Failed to fetch funding data: " + response.message());
                 }
             }
 
             @Override
-            public void onFailure(Call<Funding> call, Throwable t) {
+            public void onFailure(Call<Store> call, Throwable t) {
                 Timber.w(t);
             }
         });

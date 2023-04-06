@@ -1,69 +1,71 @@
 package site.samgyeopsal.thechef.model;
 
-import android.net.Uri;
-
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Collections;
 import java.util.List;
+
 /**
- * @filename Funding
+ * @filename Store
  * @author 최태승
- * @since 2023.03.27
- * JSON 데이터와 매핑되는 Funding 클래스를 정의
+ * @since 2023.04.03
+ * JSON 데이터와 매핑되는 Store 클래스를 정의
  *
  * <pre>
  * 수정일        	수정자       			수정내용
  * ----------  --------    ---------------------------
- * 2023.03.27	최태승		최초 생성
+ * 2023.04.03	최태승		최초 생성
  * </pre>
  */
-public class Funding {
+public class Store {
+
+    @SerializedName("fid")
+    public String sid ="";
 
     @SerializedName("fstore_name")
     public String storeName = "";
 
-    @SerializedName("fsummary")
-    public String summary = "";
-
     @SerializedName("ftitle")
-    public String title = "";
+    public String stitle = "";
 
     @SerializedName("totalprice")
     public long totalPrice = 0;
 
-    @SerializedName("totalemail")
-    public int totalEmail = 0; // 참여한 사람 수
+    @SerializedName("fthumb")
+    public String sThumbUrl = "";
 
-    @SerializedName("fid")
-    public String id = "";
+    @SerializedName("expire")
+    public int expire = 0;
 
-    @SerializedName("tname")
-    public String tName = ""; // 더현대 이름
-
-    @SerializedName("ctname")
-    public String ctName = "";
+    @SerializedName("fstatus")
+    public String fStatus = "";
 
     @SerializedName("fstory")
     public String story = "";
 
     @SerializedName("fdate")
-    public long date = 0;
+    public long fDate = 0;
 
     @SerializedName("end_date")
     public String endDate = "";
 
-    @SerializedName("fstatus")
-    public String status = "";
+    @SerializedName("ctid")
+    public String ctid = "";
 
-    @SerializedName("fstore_score")
-    public double storeScore = 0;
+    @SerializedName("ctname")
+    public String ctName = "";
 
-    @SerializedName("ffunding_score")
-    public double fundingScore = 0;
+    @SerializedName("tid")
+    public String tId = "";
 
-    @SerializedName("expire")
-    public int expire = 0;
+    @SerializedName("tname")
+    public String tName = "";
+
+    @SerializedName("memail")
+    public String mEmail = "";
+
+    @SerializedName("totalemail")
+    public int totalEmail = 0;
 
     @SerializedName("rfcount")
     public int rfCount = 0;
@@ -77,12 +79,12 @@ public class Funding {
     @SerializedName("imgs")
     public List<Image> images = Collections.emptyList();
 
-    @SerializedName("fthumb")
-    public String fThumbUrl = "";
 
-
+    public String getSid(){ return sid;}
+    public String getStoreName(){return storeName;}
     @Override
     public String toString(){
-        return this.fThumbUrl +", "+ storeName;
+        return this.sThumbUrl +", "+ storeName;
     }
+
 }
