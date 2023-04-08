@@ -1,5 +1,6 @@
 package site.samgyeopsal.thechef.model;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -22,11 +23,14 @@ public class Review {
     @SerializedName("rtype")
     public String rType = "";
 
-    @SerializedName("rimg_rul")
+    @SerializedName("rimg_url")
     public String rImageUrl = null;
 
     @SerializedName("memail")
     public String mEmail = "";
+
+    @SerializedName("mprofile")
+    public String mProfile = null;
 
     @SerializedName("rdate")
     public String rDate = "";
@@ -42,4 +46,7 @@ public class Review {
 
     @SerializedName("redate")
     public Long reDate = null;
+
+    @Expose(serialize = false, deserialize = false)
+    public String reProfile = null;
 }

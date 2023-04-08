@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Arrays;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -24,10 +24,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import site.samgyeopsal.thechef.adapter.ProductAdapter;
 import site.samgyeopsal.thechef.common.RetrofitManager;
+import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityTakeOrderBinding;
-import site.samgyeopsal.thechef.model.Option;
 import site.samgyeopsal.thechef.model.OrderResponse;
-import site.samgyeopsal.thechef.model.Product;
+import site.samgyeopsal.thechef.model.OrderUser;
 import site.samgyeopsal.thechef.retrofit.OrderService;
 import timber.log.Timber;
 /**
@@ -49,6 +49,7 @@ public class TakeOrderActivity extends BaseActivity {
     private ActivityTakeOrderBinding binding;
     private OrderResponse orderResponse;
     private final OrderService orderService = RetrofitManager.getInstance().orderService;
+    private UserPreferenceManager userPreferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,7 @@ public class TakeOrderActivity extends BaseActivity {
 
         binding = ActivityTakeOrderBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        userPreferenceManager = UserPreferenceManager.getInstance(this);
 
         initUi();
     }
@@ -98,47 +100,7 @@ public class TakeOrderActivity extends BaseActivity {
         });
 
         // 주문 받기 클릭시, 서버의 api/queue/insertQueue 호출
-        binding.orderTakeButton.setOnClickListener(v -> {
-            // TODO : qid 가변값으로 추후 반드시 수정
-            String qid = orderResponse.qid;
-            System.out.println("::::::::::qid : " + qid);
-
-            JSONObject jsonObject = new JSONObject();
-            try{
-                jsonObject.put("qid", qid);
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
-
-            RequestBody body = RequestBody.create(
-                    MediaType.parse("application/json; charset=utf-8"),
-                    jsonObject.toString());
-            System.out.println("::::::::::body::: : " + body);
-
-            orderService.insertQueue(body).enqueue(new Callback<String>() {
-                @Override
-                public void onResponse(Call<String> call, Response<String> response) {
-                    if (response.isSuccessful()){
-                        // 성공시 Activity 종료
-                        finish();
-                    } else {
-                        onFailure(call, new Exception(">>>>> Failed to insert queue. (TakeOrderActivity) "));
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<String> call, Throwable t) {
-                    Timber.d(t);
-
-                    Toast.makeText(
-                            TakeOrderActivity.this,
-                            "오류가 발생했습니다. 잠시 후 시도해주세요.",
-                            Toast.LENGTH_SHORT
-                    ).show();
-                }
-            });
-        });
-
+        binding.orderTakeButton.setOnClickListener(v -> insertQueue());
 
 
         // View binding
@@ -166,5 +128,88 @@ public class TakeOrderActivity extends BaseActivity {
         NumberFormat formatter = new DecimalFormat("#,###");
         binding.priceTextView.setText(formatter.format(orderResponse.oOriginPrice) + "원");
         binding.memoTextView.setText(orderResponse.oMemo);
+    }
+
+    private void insertQueue() {
+
+        String qid = orderResponse.qid;
+        System.out.println(":::::qid(insertQueue) : " + qid);
+
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("qid", qid);
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                jsonObject.toString()
+        );
+        System.out.println("::::::body(insertQueue) : " + body);
+
+        orderService.insertQueue(body).enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful()){
+                    orderService.getQueueList(userPreferenceManager.getUser().store.sid).enqueue(new Callback<List<OrderUser>>() {
+                        @Override
+                        public void onResponse(Call<List<OrderUser>> call, Response<List<OrderUser>> response) {
+                            if (response.isSuccessful()){
+                                int size = response.body().size();
+                                JSONObject jsonObject = new JSONObject();
+                                try{
+                                    jsonObject.put("oid", orderResponse.oId);
+                                    jsonObject.put("msg", "대기열 :" + size + "\n"
+                                    + "예상시간" + (size * 5) + "분");
+                                } catch (JSONException e){
+                                    e.printStackTrace();
+                                }
+
+                                RequestBody body = RequestBody.create(
+                                        MediaType.parse("application/json; charset=utf-8"),
+                                        jsonObject.toString()
+                                );
+
+                                System.out.println("::::::::getQueueBody : " + jsonObject);
+
+                                orderService.sendNotification(body).enqueue(new Callback<String>() {
+                                    @Override
+                                    public void onResponse(Call<String> call, Response<String> response) {
+
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<String> call, Throwable t) {
+                                        Timber.e(t);
+                                    }
+                                });
+                                finish();
+                            } else {
+                                finish();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<OrderUser>> call, Throwable t) {
+                            Timber.e(t);
+                            finish();
+                        }
+                    });
+                }else {
+                    onFailure(call, new Exception(">>>>>>>> Failed to insert queue. (TakeOrderActivity) "));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Timber.d(t);
+                Toast.makeText(
+                        TakeOrderActivity.this,
+                        "오류가 발생했습니다. 잠시 후 시도해주세요.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 }

@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.ImageView;
@@ -22,10 +21,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
-import androidx.core.graphics.Insets;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.lifecycle.Lifecycle;
@@ -39,6 +38,7 @@ import com.google.zxing.BarcodeFormat;
 import com.squareup.seismic.ShakeDetector;
 
 import java.util.Collections;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -48,6 +48,7 @@ import site.samgyeopsal.thechef.common.RetrofitManager;
 import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityHomeBinding;
 import site.samgyeopsal.thechef.model.OrderResponse;
+import site.samgyeopsal.thechef.model.OrderUser;
 import site.samgyeopsal.thechef.model.Store;
 import site.samgyeopsal.thechef.retrofit.OrderService;
 import site.samgyeopsal.thechef.retrofit.StoreService;
@@ -75,6 +76,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
     private UserPreferenceManager userPreferenceManager;
 
     private ImageView imageView;
+    private Thread thread;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
@@ -292,11 +294,32 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
         } else {
             codeScanner.startPreview(); // 카메라 미리보기
         }
+
+        thread = new Thread(){
+            @Override
+            public void run() {
+                while (true) {
+                    uiHandler.post(() -> updateWaitingNumber());
+                    try{
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e){
+                        break;
+                    }
+                }
+            }
+        } ;
+        thread.start();
     }
 
     @Override
     protected void onPause(){
         codeScanner.releaseResources();
+
+        if (thread != null){
+            thread.interrupt();
+            thread = null;
+        }
+
         super.onPause();
     }
 
@@ -382,6 +405,28 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
             @Override
             public void onFailure(Call<Store> call, Throwable t) {
                 Timber.w(t);
+            }
+        });
+    }
+
+    private void updateWaitingNumber() {
+        String sid = userPreferenceManager.getUser().store.getSid();
+
+        orderService.getQueueList(sid).enqueue(new Callback<List<OrderUser>>() {
+            @Override
+            public void onResponse(Call<List<OrderUser>> call, Response<List<OrderUser>> response) {
+                int number = 0;
+
+                if (response.isSuccessful()) {
+
+                    number = response.body().size();
+                }
+                binding.waitingNumberTextView.setText(String.valueOf(number));
+            }
+
+            @Override
+            public void onFailure(Call<List<OrderUser>> call, Throwable t) {
+                binding.waitingNumberTextView.setText(String.valueOf(0));
             }
         });
     }

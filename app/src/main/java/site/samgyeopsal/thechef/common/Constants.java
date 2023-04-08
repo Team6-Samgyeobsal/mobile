@@ -1,6 +1,6 @@
 package site.samgyeopsal.thechef.common;
 
-import okhttp3.CookieJar;
+
 
 /**
  * @filename Constants

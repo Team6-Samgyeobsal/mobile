@@ -1,7 +1,11 @@
 package site.samgyeopsal.thechef.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import site.samgyeopsal.thechef.retrofit.AuthService;
 import site.samgyeopsal.thechef.retrofit.OrderService;
 import site.samgyeopsal.thechef.retrofit.ReviewService;
@@ -47,9 +51,12 @@ public class RetrofitManager {
 
 
     private RetrofitManager() {
+        Gson gson = new GsonBuilder().setLenient().create();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.baseUrl)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .addConverterFactory(ScalarsConverterFactory.create())
                 .build();
 
         authService = retrofit.create(AuthService.class);

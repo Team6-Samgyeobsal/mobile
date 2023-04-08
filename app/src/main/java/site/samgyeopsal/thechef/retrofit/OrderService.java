@@ -37,4 +37,7 @@ public interface OrderService {
 
     @POST("/api/queue/useQrCode")
     Call<String>  useQrCode(@Body RequestBody requestBody);
+
+    @POST("/api/common/message")
+    Call<String> sendNotification(@Body RequestBody requestBody);
 }

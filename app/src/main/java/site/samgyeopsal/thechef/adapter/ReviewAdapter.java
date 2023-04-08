@@ -10,15 +10,20 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import site.samgyeopsal.thechef.R;
 import site.samgyeopsal.thechef.databinding.ItemReviewBinding;
+import site.samgyeopsal.thechef.databinding.ItemReviewWithReplyBinding;
 import site.samgyeopsal.thechef.model.Review;
 
-public class ReviewAdapter extends ListAdapter<Review, ReviewAdapter.ReviewItemViewHolder> {
+public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> {
 
 
     private Consumer<Review>  onItemClickListener;
@@ -36,6 +41,7 @@ public class ReviewAdapter extends ListAdapter<Review, ReviewAdapter.ReviewItemV
                         TextUtils.equals(oldItem.rType, newItem.rType) &&
                         TextUtils.equals(oldItem.rImageUrl, newItem.rImageUrl) &&
                         TextUtils.equals(oldItem.mEmail, newItem.mEmail) &&
+                        TextUtils.equals(oldItem.mProfile, newItem.mProfile) &&
                         TextUtils.equals(oldItem.rDate, newItem.rDate) &&
                         TextUtils.equals(oldItem.rContent, newItem.rContent) &&
                         TextUtils.equals(oldItem.reContent, newItem.reContent);
@@ -47,12 +53,29 @@ public class ReviewAdapter extends ListAdapter<Review, ReviewAdapter.ReviewItemV
         this.onItemClickListener = onItemClickListener;
     }
 
+    @Override
+    public int getItemViewType(int position){
+        if (position == -1) return 0;
+
+        if (TextUtils.isEmpty(getItem(position).reContent)) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+
     @NonNull
     @Override
-    public ReviewItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        ItemReviewBinding binding = ItemReviewBinding.inflate(inflater, parent, false);
-        return new ReviewItemViewHolder(binding);
+
+        if (viewType == 0) {
+            ItemReviewBinding binding = ItemReviewBinding.inflate(inflater, parent, false);
+            return new ReviewItemViewHolder(binding);
+        } else {
+            ItemReviewWithReplyBinding binding = ItemReviewWithReplyBinding.inflate(inflater, parent, false);
+            return new ReviewWithReplyItemViewHolder(binding);
+        }
     }
 
     /*
@@ -60,38 +83,83 @@ public class ReviewAdapter extends ListAdapter<Review, ReviewAdapter.ReviewItemV
      */
 
     @Override
-    public void onBindViewHolder(@NonNull ReviewItemViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Review review = getItem(position);
-        ItemReviewBinding binding = holder.binding;
 
-        binding.getRoot().setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if(onItemClickListener!= null){
+        if (holder instanceof ReviewItemViewHolder){
+            ItemReviewBinding binding = ((ReviewItemViewHolder) holder).binding;
+
+            binding.getRoot().setOnClickListener(v -> {
+                if (onItemClickListener != null) {
                     onItemClickListener.accept(review);
                 }
+            });
+
+            binding.idTextView.setText(review.mEmail.split("@")[0]);
+            binding.ratingBar.setRating(review.rScore);
+
+            if (TextUtils.isEmpty(review.mProfile)){
+                binding.profileImageView.setImageResource(R.drawable.img_profile_default);
+            } else {
+                Glide.with(binding.profileImageView)
+                        .load(review.mProfile)
+                        .placeholder(R.drawable.img_profile_default)
+                        .into(binding.profileImageView);
             }
-        });
 
-        binding.contentTextView.setText(review.rContent); // 리뷰 내용
-        binding.dateTextView.setText(review.rDate); // 리뷰 날짜
+            binding.contentTextView.setText(review.rContent); // 리뷰 내용
+            binding.dateTextView.setText(review.rDate); // 리뷰 날짜
+    } else if (holder instanceof ReviewWithReplyItemViewHolder) {
+            ItemReviewWithReplyBinding binding = ((ReviewWithReplyItemViewHolder) holder).binding;
 
-        if (review.reContent == null) {
-            binding.replyContainer.setVisibility(View.GONE);
-        } else {
-            binding.replyContainer.setVisibility(View.VISIBLE);
+            binding.clickContainer.setOnClickListener(v -> {
+                if (onItemClickListener != null) {
+                    onItemClickListener.accept(review);
+                }
+            });
+
+            binding.idTextView.setText(review.mEmail.split("@")[0]);
+            binding.ratingBar.setRating(review.rScore);
+
+            if (TextUtils.isEmpty(review.mProfile)) {
+                binding.profileImageView.setImageResource(R.drawable.img_profile_default);
+            } else {
+                Glide.with(binding.profileImageView)
+                        .load(review.mProfile)
+                        .placeholder(R.drawable.img_profile_default)
+                        .into(binding.profileImageView);
+            }
+            binding.contentTextView.setText(review.rContent);
+            binding.dateTextView.setText(review.rDate);
             binding.replyTextView.setText(review.reContent);
             binding.replyDateTextView.setText(
-                    new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(review.reDate))
-            );
-        }
-    }
+                    new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(review.reDate)));
 
+            if (TextUtils.isEmpty(review.reProfile)) {
+                binding.replyProfileImageView.setImageResource(R.drawable.img_profile_default);
+            } else {
+                Glide.with(binding.replyProfileImageView)
+                        .load(review.reProfile)
+                        .placeholder(R.drawable.img_profile_default)
+                        .into(binding.replyProfileImageView);
+            }
+        }
+
+    }
 
     static class ReviewItemViewHolder extends RecyclerView.ViewHolder{
         public ItemReviewBinding binding;
 
         public ReviewItemViewHolder(@NonNull ItemReviewBinding binding){
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+    }
+
+    static class ReviewWithReplyItemViewHolder extends RecyclerView.ViewHolder{
+        public ItemReviewWithReplyBinding binding;
+
+        public ReviewWithReplyItemViewHolder(@NonNull ItemReviewWithReplyBinding binding){
             super(binding.getRoot());
             this.binding = binding;
         }

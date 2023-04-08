@@ -92,7 +92,6 @@ public class OrderHistoryAdapter extends ListAdapter<OrderUser, OrderHistoryAdap
         });
 
         binding.contentTextView.setText(user.mName); // 사용자 이름
-        binding.contentTextView.setText(user.qid);
         System.out.println("::::::USER QID : " + user.qid);
         System.out.println(":::::USER NAME : " + user.mName);
         Calendar now = Calendar.getInstance();

@@ -74,12 +74,13 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/waiting_number_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="3"
                 android:textAppearance="?attr/textAppearanceHeadline6"
                 android:textColor="?attr/colorOnPrimary"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="3"/>
 
         </LinearLayout>
 

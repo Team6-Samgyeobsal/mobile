@@ -10,7 +10,8 @@ import com.google.gson.annotations.SerializedName;
  * <pre>
  * 수정일        	수정자       			수정내용
  * ----------  --------    ---------------------------
- * 2023.04.03	최태승		최초 생성
+ * 2023.04.03	최태승        최초 생성
+ * 2023.04.06   최태승        알림 추가
  * </pre>
  */
 
@@ -24,6 +25,12 @@ public class OrderUser {
 
     @SerializedName("qid")
     public String qid ="";
+
+    @SerializedName("oid")
+    public String oid = "";
+
+    @SerializedName("fstore_name")
+    public String storeName = "";
 
     @Override
     public String toString(){

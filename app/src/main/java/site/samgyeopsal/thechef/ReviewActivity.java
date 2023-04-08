@@ -10,7 +10,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
+import com.arjinmc.recyclerviewdecoration.RecyclerViewLinearItemDecoration;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import org.json.JSONException;
@@ -33,6 +35,7 @@ import site.samgyeopsal.thechef.model.Review;
 import site.samgyeopsal.thechef.model.ReviewResponse;
 import site.samgyeopsal.thechef.model.Store;
 import site.samgyeopsal.thechef.retrofit.ReviewService;
+import site.samgyeopsal.thechef.retrofit.StoreService;
 import timber.log.Timber;
 
 /**
@@ -52,10 +55,12 @@ public class ReviewActivity extends BaseActivity {
     private ReviewAdapter adapter = new ReviewAdapter();
 
     private ActivityReviewBinding binding;
+    private final StoreService storeService = RetrofitManager.getInstance().storeService;
     private final ReviewService reviewService = RetrofitManager.getInstance().reviewService;
     private ArrayList<Review> reviews = new ArrayList<>();
     private Call<ReviewResponse> call;
     public UserPreferenceManager userPreferenceManager;
+    private String replyProfileUrl = null;
 
 
 
@@ -171,14 +176,27 @@ public class ReviewActivity extends BaseActivity {
         binding.swipeRefreshLayout.setOnRefreshListener(this::refresh);
 
         // 선 굵기
-        /*RecyclerViewLinearItemDecoration decoration = new RecyclerViewLinearItemDecoration.Builder(this)
+        RecyclerViewLinearItemDecoration decoration = new RecyclerViewLinearItemDecoration.Builder(this)
                 .color(ContextCompat.getColor(this, R.color.black12))
                 .thickness((int) (getResources().getDisplayMetrics().density * 1))
                 .create();
-        binding.recyclerView.addItemDecoration(decoration);*/
+        binding.recyclerView.addItemDecoration(decoration);
         adapter.setOnItemClickListener(this::writeReply);
         binding.recyclerView.setAdapter(adapter);
-        refresh();
+
+        storeService.getStore(userPreferenceManager.getUser().store.sid).enqueue(new Callback<Store>() {
+            @Override
+            public void onResponse(Call<Store> call, Response<Store> response) {
+                if (response.isSuccessful()){
+                    replyProfileUrl = response.body().sThumbUrl;
+                } refresh();
+            }
+
+            @Override
+            public void onFailure(Call<Store> call, Throwable t) {
+                refresh();
+            }
+        });
     }
 
     /*
@@ -234,6 +252,10 @@ public class ReviewActivity extends BaseActivity {
                         reviews.addAll(Collections.emptyList());
                     }
 
+                    for (Review review : reviews){
+                        review.reProfile = replyProfileUrl;
+                    }
+
                     setQuery(binding.searchField.getEditText().getText().toString().trim());
                     binding.swipeRefreshLayout.setRefreshing(false);
                 } else {
@@ -280,7 +302,7 @@ public class ReviewActivity extends BaseActivity {
 
             binding.negativeButton.setText("삭제");
             binding.negativeButton.setOnClickListener(v -> {
-                writeReply(review, binding.replyField.getEditText().getText().toString().trim());
+                writeReply(review,"");
                 dialog.dismiss();
             });
         } else {
@@ -291,6 +313,7 @@ public class ReviewActivity extends BaseActivity {
 
         binding.positiveButton.setOnClickListener(v -> {
             writeReply(review, binding.replyField.getEditText().getText().toString().trim());
+            dialog.dismiss();
             });
 
         userPreferenceManager = UserPreferenceManager.getInstance(this);
@@ -299,7 +322,7 @@ public class ReviewActivity extends BaseActivity {
     }
 
     private void writeReply(Review review, String message){
-        //userPreferenceManager = UserPreferenceManager.getInstance(this);
+        userPreferenceManager = UserPreferenceManager.getInstance(this);
 
 
 
@@ -337,5 +360,6 @@ public class ReviewActivity extends BaseActivity {
         });
 
         System.out.println("::::::body::::::" + body);
+        refresh();
     }
 }

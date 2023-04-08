@@ -48,8 +48,6 @@ public class OrderHistoryActivity extends BaseActivity {
 
     private ActivityOrderHistoryBinding binding;
 
-    private OrderResponse orderResponse;
-    private OrderUser orderUser;
     private final OrderService orderService = RetrofitManager.getInstance().orderService;
     private final ArrayList<OrderUser> users = new ArrayList<>();
 
@@ -237,16 +235,51 @@ public class OrderHistoryActivity extends BaseActivity {
     }
 
     /**
-     * 대기열 알림 다이얼로그를 출력한다.
+     * 대기열 알림 다이얼로그를 출력
      *
      * @param user 주문한 사용자 정보
      */
     private void showNotificationDialog(OrderUser user) {
+        String oid = user.oid;
+        System.out.println(":::::::: 주문내역 - 주문번호 : " + oid);
         new MaterialAlertDialogBuilder(this)
                 .setTitle("대기열 알림")
                 .setMessage("알림을 보내시겠습니까?")
                 .setNegativeButton("아니오", null)
                 .setPositiveButton("보냅니다", (dialog, which) -> {
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        jsonObject.put("oid", oid);
+                        jsonObject.put("msg", "곧 식사가 가능합니다." );
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    RequestBody body = RequestBody.create(
+                            MediaType.parse("application/json; charset=utf-8"),
+                            jsonObject.toString()
+                    );
+
+                    System.out.println(":::::: getQueue Body(OrderHistoryActivity) : " + jsonObject);
+
+                    orderService.sendNotification(body).enqueue(new Callback<String>() {
+                        @Override
+                        public void onResponse(Call<String> call, Response<String> response) {
+                            if (!response.isSuccessful()){
+                                onFailure(call, new Exception(":::Failed to insert queue."));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<String> call, Throwable t) {
+                            Timber.d(t);
+                            Toast.makeText(
+                                    OrderHistoryActivity.this,
+                                    "오류가 발생하였습니다. 잠시 후 다시 시도해주세요.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    });
 
                 })
                 .show();
@@ -259,7 +292,6 @@ public class OrderHistoryActivity extends BaseActivity {
      * @param user 주문한 사용자 정보
      */
     private void showRemoveDialog(OrderUser user) {
-        userPreferenceManager = UserPreferenceManager.getInstance(this);
         new MaterialAlertDialogBuilder(this)
                 .setTitle("대기열 삭제")
                 .setMessage("고객이 도착하여 삭제하시겠습니까?")
