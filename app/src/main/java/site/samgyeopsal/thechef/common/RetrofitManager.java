@@ -9,6 +9,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 import site.samgyeopsal.thechef.retrofit.AuthService;
 import site.samgyeopsal.thechef.retrofit.OrderService;
 import site.samgyeopsal.thechef.retrofit.ReviewService;
+import site.samgyeopsal.thechef.retrofit.SalesService;
 import site.samgyeopsal.thechef.retrofit.StoreService;
 
 /**
@@ -24,6 +25,7 @@ import site.samgyeopsal.thechef.retrofit.StoreService;
  * 2023.03.22   최태승        review 연동
  * 2023.03.25   최태승        funding 연동
  * 2023.04.03   최태승        funding -> store
+ * 2023.04.11   최태승        salesService 추가
  * </pre>
  */
 
@@ -48,6 +50,7 @@ public class RetrofitManager {
     public ReviewService reviewService;
     public StoreService storeService;
     public OrderService orderService;
+    public SalesService salesService;
 
 
     private RetrofitManager() {
@@ -63,5 +66,6 @@ public class RetrofitManager {
         reviewService = retrofit.create(ReviewService.class);
         storeService = retrofit.create(StoreService.class);
         orderService = retrofit.create(OrderService.class);
+        salesService = retrofit.create(SalesService.class);
     }
 }

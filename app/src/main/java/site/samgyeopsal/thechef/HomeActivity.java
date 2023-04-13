@@ -264,6 +264,12 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
                 startActivity(intent);
             }
         });
+
+        binding.salesHistoryButton.setOnClickListener(v->{
+            Intent intent = new Intent(HomeActivity.this, SalesHistoryActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        });
         binding.myInformationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

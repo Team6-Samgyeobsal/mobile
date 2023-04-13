@@ -38,10 +38,17 @@ import site.samgyeopsal.thechef.retrofit.OrderService;
 import timber.log.Timber;
 
 /**
- * @author
+ * @filename OrderHistoryActivity
+ * @author 최태승
+ * @since 2023.04.03
  * 주문 내역 화면
- * <p>
- * 서버에서 데이터를 가져오는 함수를 제외한 나머지는 ReviewActivity 와 동일하다.
+ * 서버에서 데이터를 가져오는 함수를 제외한 나머지는 ReviewActivity와 동일
+ *
+ * <pre>
+ * 수정일        	수정자       			수정내용
+ * ----------  --------    ---------------------------
+ * 2023.04.03	최태승        최초 생성
+ * </pre>
  */
 public class OrderHistoryActivity extends BaseActivity {
     private final OrderHistoryAdapter adapter = new OrderHistoryAdapter();
@@ -51,8 +58,6 @@ public class OrderHistoryActivity extends BaseActivity {
     private final OrderService orderService = RetrofitManager.getInstance().orderService;
     private final ArrayList<OrderUser> users = new ArrayList<>();
 
-    // 서버에서 주문내역을 가져올 때, 필요한 Parameter
-    // TODO: FID 는 고정이 아닌 가변이 되도록 차후 수정이 필요함
 
     private UserPreferenceManager userPreferenceManager;
 
@@ -80,6 +85,7 @@ public class OrderHistoryActivity extends BaseActivity {
 
 
     private void initUi() {
+        binding.titleTextView.setText(userPreferenceManager.getUser().store.getStoreName());
         binding.homeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -267,6 +273,12 @@ public class OrderHistoryActivity extends BaseActivity {
                         public void onResponse(Call<String> call, Response<String> response) {
                             if (!response.isSuccessful()){
                                 onFailure(call, new Exception(":::Failed to insert queue."));
+                            } else {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "알림이 전송되었습니다. ",
+                                        Toast.LENGTH_SHORT
+                                ).show();
                             }
                         }
 
@@ -318,6 +330,11 @@ public class OrderHistoryActivity extends BaseActivity {
                         @Override
                         public void onResponse(Call<String> call, Response<String> response) {
                             if (response.isSuccessful()) {
+                                Toast.makeText(
+                                        getApplicationContext(),
+                                        "삭제되었습니다.",
+                                        Toast.LENGTH_SHORT
+                                ).show();
                                 refresh();
                             } else {
                                 onFailure(call, new Exception("Failed to insert queue."));

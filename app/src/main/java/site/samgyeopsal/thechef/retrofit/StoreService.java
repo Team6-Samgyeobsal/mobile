@@ -7,8 +7,8 @@ import site.samgyeopsal.thechef.model.Store;
 
 /**
  * @author 최태승
- * @filename FundingService
- * @since 2023.03.25
+ * @filename StoreService
+ * @since 2023.03.22
  * 입점 점포 정보 HTTP GET 요청을 정의하는 Retrofit API 인터페이스
  *
  * <pre>

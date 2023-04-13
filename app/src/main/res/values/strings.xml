@@ -1,3 +1,9 @@
 <resources>
+    <string-array name="sales_history_sort">
+        <item>판매시간순</item>
+        <item>상품명순</item>
+        <item>판매금액순</item>
+    </string-array>
+
     <string name="app_name">TheChef</string>
 </resources>

@@ -24,6 +24,18 @@
         android:theme="@style/Theme.TheChef"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity android:name=".SalesDetailsActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity android:name=".SalesHistoryActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value=""/>
+        </activity>
         <activity
             android:name=".OrderHistoryActivity"
             android:exported="false">

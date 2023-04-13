@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="?attr/colorSurface"
     android:orientation="vertical"
     android:padding="16dp">
@@ -26,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginVertical="2dp"
-            android:text="• 추가선택 : 곱빼기로 변경 (1,000원) / 냉육수 추가 (500원)"
+            tools:text="• 추가선택 : 곱빼기로 변경 (1,000원) / 냉육수 추가 (500원)"
             android:textAppearance="?attr/textAppearanceCaption" />
 
     </LinearLayout>

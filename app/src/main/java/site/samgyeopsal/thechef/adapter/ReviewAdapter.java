@@ -22,19 +22,34 @@ import site.samgyeopsal.thechef.R;
 import site.samgyeopsal.thechef.databinding.ItemReviewBinding;
 import site.samgyeopsal.thechef.databinding.ItemReviewWithReplyBinding;
 import site.samgyeopsal.thechef.model.Review;
-
+/**
+ * @filename ReviewAdapter
+ * @author 최태승
+ * @since 2023.03.22
+ * 리뷰 어댑터이며 ListAdapter를 상속 받음
+ *
+ * <pre>
+ * 수정일        	수정자       			수정내용
+ * ----------  --------    ---------------------------
+ * 2023.03.22	최태승        최초 생성
+ * </pre>
+ */
 public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> {
 
 
     private Consumer<Review>  onItemClickListener;
 
+    // 생성자에서 DiffUtil 사용을 위한 초기화
     public ReviewAdapter() {
         super(new DiffUtil.ItemCallback<Review>() {
+
+            // 두 아이템이 같은지 확인
             @Override
             public boolean areItemsTheSame(@NonNull Review oldItem, @NonNull Review newItem) {
                 return false;
             }
 
+            // 두 아이템이 같은지 확인
             @Override
             public boolean areContentsTheSame(@NonNull Review oldItem, @NonNull Review newItem) {
                 return oldItem.rScore == newItem.rScore &&
@@ -49,10 +64,12 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
         });
     }
 
+    // 클릭 리스너 설정
     public void setOnItemClickListener(Consumer<Review> onItemClickListener){
         this.onItemClickListener = onItemClickListener;
     }
 
+    // 아이템 뷰 유형 결정
     @Override
     public int getItemViewType(int position){
         if (position == -1) return 0;
@@ -64,6 +81,7 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
         }
     }
 
+    // 뷰홀더 생성
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -86,18 +104,22 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Review review = getItem(position);
 
+        // 일단 리뷰 뷰횰더일 경우
         if (holder instanceof ReviewItemViewHolder){
             ItemReviewBinding binding = ((ReviewItemViewHolder) holder).binding;
 
+            // 아이템 클릭 시 이벤트 처리
             binding.getRoot().setOnClickListener(v -> {
                 if (onItemClickListener != null) {
                     onItemClickListener.accept(review);
                 }
             });
 
-            binding.idTextView.setText(review.mEmail.split("@")[0]);
+            // 아이템 정보 설정
+            binding.idTextView.setText(review.mEmail.split("@")[0]); // mEmail에서 @뒤로는 출력 안하기
             binding.ratingBar.setRating(review.rScore);
 
+            // 프로필 이미지 설정
             if (TextUtils.isEmpty(review.mProfile)){
                 binding.profileImageView.setImageResource(R.drawable.img_profile_default);
             } else {
@@ -109,9 +131,12 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
 
             binding.contentTextView.setText(review.rContent); // 리뷰 내용
             binding.dateTextView.setText(review.rDate); // 리뷰 날짜
+
+            // 답글이 있는 리뷰 뷰홀더의 경우
     } else if (holder instanceof ReviewWithReplyItemViewHolder) {
             ItemReviewWithReplyBinding binding = ((ReviewWithReplyItemViewHolder) holder).binding;
 
+            // 아이템 클릭 시 이벤트 처리
             binding.clickContainer.setOnClickListener(v -> {
                 if (onItemClickListener != null) {
                     onItemClickListener.accept(review);
@@ -121,6 +146,7 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
             binding.idTextView.setText(review.mEmail.split("@")[0]);
             binding.ratingBar.setRating(review.rScore);
 
+            // 프로필 이미지 설정
             if (TextUtils.isEmpty(review.mProfile)) {
                 binding.profileImageView.setImageResource(R.drawable.img_profile_default);
             } else {
@@ -147,6 +173,7 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
 
     }
 
+    // 일반 리뷰 아이템 뷰홀더
     static class ReviewItemViewHolder extends RecyclerView.ViewHolder{
         public ItemReviewBinding binding;
 
@@ -156,6 +183,7 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
         }
     }
 
+    // 답글이 있는 리뷰 아이템 뷰홀더
     static class ReviewWithReplyItemViewHolder extends RecyclerView.ViewHolder{
         public ItemReviewWithReplyBinding binding;
 

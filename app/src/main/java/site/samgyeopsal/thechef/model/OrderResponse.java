@@ -54,7 +54,7 @@ public class OrderResponse implements Parcelable {
     public String pmCode = "";
 
     @SerializedName("qrused_date")
-    public String qrUsedDate = null;
+    public long qrUsedDate = 0;
 
     @SerializedName("cpid")
     public String cpId = "";
@@ -106,7 +106,7 @@ public class OrderResponse implements Parcelable {
         oDate = in.readLong();
         mEmail = in.readString();
         pmCode = in.readString();
-        qrUsedDate = in.readString();
+        qrUsedDate = in.readLong();
         cpId = in.readString();
         fStoreName = in.readString();
         fTitle = in.readString();
@@ -134,7 +134,7 @@ public class OrderResponse implements Parcelable {
         dest.writeLong(oDate);
         dest.writeString(mEmail);
         dest.writeString(pmCode);
-        dest.writeString(qrUsedDate);
+        dest.writeLong(qrUsedDate);
         dest.writeString(cpId);
         dest.writeString(fStoreName);
         dest.writeString(fTitle);

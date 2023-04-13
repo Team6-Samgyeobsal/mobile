@@ -115,7 +115,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
                 android:layout_weight="1"
-                android:text="최씨네부대찌개"
+                tools:text="최씨네부대찌개"
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="?attr/colorPrimary"
                 android:textSize="18sp"
@@ -193,6 +193,7 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/sales_history_button"
                         android:layout_width="72dp"
                         android:layout_height="72dp"
                         app:cardBackgroundColor="@color/black5"

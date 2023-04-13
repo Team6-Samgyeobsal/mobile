@@ -22,7 +22,6 @@ import site.samgyeopsal.thechef.common.RetrofitManager;
 import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ActivityInformationBinding;
 import site.samgyeopsal.thechef.model.Store;
-import site.samgyeopsal.thechef.model.User;
 import site.samgyeopsal.thechef.retrofit.StoreService;
 import timber.log.Timber;
 

@@ -3,11 +3,13 @@ package site.samgyeopsal.thechef;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -90,6 +92,7 @@ public class ReviewActivity extends BaseActivity {
      */
 
     private void initUi() {
+        binding.titleTextView.setText(userPreferenceManager.getUser().store.getStoreName());
         // 홈 버튼
         System.out.println(":::::::initUI");
         binding.homeButton.setOnClickListener(new View.OnClickListener() {
@@ -299,7 +302,7 @@ public class ReviewActivity extends BaseActivity {
 
         if (review.reContent != null && !review.reContent.isEmpty()){
             binding.replyField.getEditText().append(review.reContent);
-
+            binding.positiveButton.setText("수정");
             binding.negativeButton.setText("삭제");
             binding.negativeButton.setOnClickListener(v -> {
                 writeReply(review,"");
@@ -316,15 +319,11 @@ public class ReviewActivity extends BaseActivity {
             dialog.dismiss();
             });
 
-        userPreferenceManager = UserPreferenceManager.getInstance(this);
         dialog.show();
 
     }
 
     private void writeReply(Review review, String message){
-        userPreferenceManager = UserPreferenceManager.getInstance(this);
-
-
 
         // 로그인 요청에 사용할 JSon 객체 생성
         JSONObject jsonObject = new JSONObject();
@@ -348,6 +347,29 @@ public class ReviewActivity extends BaseActivity {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 if (response.isSuccessful()){
+                    if(TextUtils.isEmpty(review.reContent)){
+                        if (!message.isEmpty()){
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "답글이 등록되었습니다.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    } else {
+                        if (message.isEmpty()){
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "답글이 삭제되었습니다.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        } else {
+                            Toast.makeText(
+                                    getApplicationContext(),
+                                    "답글이 수정되었습니다.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
                     refresh();
                 } else {
                     Timber.d(response.message());

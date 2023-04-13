@@ -22,6 +22,7 @@ import site.samgyeopsal.thechef.model.OrderUser;
  * 수정일        	수정자       	수정내용
  * ----------  --------    ---------------------------
  * 2023.03.29   최태승        최초생성
+ * 2023.04.08   최태승        알람 기능 추가
  * </pre>
  */
 public interface OrderService {
