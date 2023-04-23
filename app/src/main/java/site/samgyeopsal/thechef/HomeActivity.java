@@ -50,6 +50,7 @@ import site.samgyeopsal.thechef.databinding.ActivityHomeBinding;
 import site.samgyeopsal.thechef.model.OrderResponse;
 import site.samgyeopsal.thechef.model.OrderUser;
 import site.samgyeopsal.thechef.model.Store;
+import site.samgyeopsal.thechef.model.User;
 import site.samgyeopsal.thechef.retrofit.OrderService;
 import site.samgyeopsal.thechef.retrofit.StoreService;
 import timber.log.Timber;
@@ -372,7 +373,7 @@ public class HomeActivity extends AppCompatActivity implements ShakeDetector.Lis
 
                     if (store.sThumbUrl != null){
                         GlideApp.with(context)
-                                .load(store.sThumbUrl)
+                                .load(userPreferenceManager.getUser().member.mProfile)
                                 .apply(requestOptions)
                                 .into(imageView);
                         Timber.d("fThumbUrl : %s", store.sThumbUrl);

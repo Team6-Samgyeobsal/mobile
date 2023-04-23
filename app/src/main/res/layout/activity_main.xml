@@ -38,24 +38,23 @@
         app:cornerRadius="4dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/sign_in_with_google_button"
+        android:id="@+id/sign_in_with_kakao_button"
         style="@style/Widget.Material3.Button.UnelevatedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="24dp"
-        android:drawableLeft="@drawable/ic_google_24"
+        android:drawableLeft="@drawable/ic_kakao_24"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:minHeight="52dp"
         android:paddingRight="48dp"
-        android:text="구글 간편 로그인"
+        android:text="카카오 계정으로 로그인"
         android:textAppearance="?attr/textAppearanceBody1"
-        android:textColor="@color/black"
-        app:backgroundTint="@color/white"
+        android:textColor="#3A1D1D"
+        app:backgroundTint="#F7E600"
         app:cornerRadius="4dp"
-        app:strokeColor="@color/black"
-        app:strokeWidth="1dp" />
+        app:strokeWidth="0dp" />
 
 </LinearLayout>

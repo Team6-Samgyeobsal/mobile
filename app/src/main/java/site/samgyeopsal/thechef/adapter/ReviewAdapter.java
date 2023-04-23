@@ -19,9 +19,12 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 import site.samgyeopsal.thechef.R;
+import site.samgyeopsal.thechef.common.UserPreferenceManager;
 import site.samgyeopsal.thechef.databinding.ItemReviewBinding;
 import site.samgyeopsal.thechef.databinding.ItemReviewWithReplyBinding;
 import site.samgyeopsal.thechef.model.Review;
+import site.samgyeopsal.thechef.model.User;
+
 /**
  * @filename ReviewAdapter
  * @author 최태승
@@ -39,9 +42,13 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
 
     private Consumer<Review>  onItemClickListener;
 
+    private UserPreferenceManager userPreferenceManager;
+
+
     // 생성자에서 DiffUtil 사용을 위한 초기화
-    public ReviewAdapter() {
+    public ReviewAdapter(UserPreferenceManager userPreferenceManager) {
         super(new DiffUtil.ItemCallback<Review>() {
+
 
             // 두 아이템이 같은지 확인
             @Override
@@ -62,6 +69,8 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
                         TextUtils.equals(oldItem.reContent, newItem.reContent);
             }
         });
+
+        this.userPreferenceManager = userPreferenceManager;
     }
 
     // 클릭 리스너 설정
@@ -73,6 +82,7 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
     @Override
     public int getItemViewType(int position){
         if (position == -1) return 0;
+        if (getItemCount() <= position) return 0;
 
         if (TextUtils.isEmpty(getItem(position).reContent)) {
             return 0;
@@ -133,7 +143,7 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
             binding.dateTextView.setText(review.rDate); // 리뷰 날짜
 
             // 답글이 있는 리뷰 뷰홀더의 경우
-    } else if (holder instanceof ReviewWithReplyItemViewHolder) {
+        } else if (holder instanceof ReviewWithReplyItemViewHolder) {
             ItemReviewWithReplyBinding binding = ((ReviewWithReplyItemViewHolder) holder).binding;
 
             // 아이템 클릭 시 이벤트 처리
@@ -161,11 +171,11 @@ public class ReviewAdapter extends ListAdapter<Review, RecyclerView.ViewHolder> 
             binding.replyDateTextView.setText(
                     new SimpleDateFormat("yyyy.MM.dd", Locale.KOREA).format(new Date(review.reDate)));
 
-            if (TextUtils.isEmpty(review.reProfile)) {
+            if (TextUtils.isEmpty(userPreferenceManager.getUser().member.mProfile)) {
                 binding.replyProfileImageView.setImageResource(R.drawable.img_profile_default);
             } else {
                 Glide.with(binding.replyProfileImageView)
-                        .load(review.reProfile)
+                        .load(userPreferenceManager.getUser().member.mProfile)
                         .placeholder(R.drawable.img_profile_default)
                         .into(binding.replyProfileImageView);
             }

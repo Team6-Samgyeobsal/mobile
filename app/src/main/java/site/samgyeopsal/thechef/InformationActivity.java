@@ -15,6 +15,8 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.bumptech.glide.Glide;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -133,7 +135,8 @@ public class InformationActivity extends AppCompatActivity {
                     // binding.backgroundImageView.setImageBitmap();
 
                     // 프로필 이미지
-                    // binding.profileImageView.setImageBitmap();
+                    Glide.with(InformationActivity.this).load(userPreferenceManager.getUser().member.mProfile).into(binding.profileImageView);
+
 
                     binding.totalEmailTextView.setText(String.valueOf(store.totalEmail));
                     binding.priceTextView.setText(String.valueOf(store.totalPrice));

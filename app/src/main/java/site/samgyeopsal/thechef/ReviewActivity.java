@@ -54,7 +54,7 @@ import timber.log.Timber;
  */
 
 public class ReviewActivity extends BaseActivity {
-    private ReviewAdapter adapter = new ReviewAdapter();
+    private ReviewAdapter adapter;
 
     private ActivityReviewBinding binding;
     private final StoreService storeService = RetrofitManager.getInstance().storeService;
@@ -79,6 +79,7 @@ public class ReviewActivity extends BaseActivity {
         binding = ActivityReviewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         userPreferenceManager = UserPreferenceManager.getInstance(this);
+        adapter =new ReviewAdapter(userPreferenceManager);
 
 
 

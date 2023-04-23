@@ -42,4 +42,7 @@ public class Member {
 
     @SerializedName("mmileage")
     public String mileage = "";
+
+    @SerializedName("mprofile")
+    public String mProfile ="";
 }
